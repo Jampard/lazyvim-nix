@@ -3,9 +3,17 @@
 
 {
   # Function to scan user plugins from LazyVim configuration
-  scanUserPlugins = config_path:
+  #
+  # NOTE: This previously used IFD to scan ~/.config/nvim/lua/plugins/.
+  # Disabled because:
+  # 1. IFD fails during cross-platform eval (Linux configs on macOS)
+  # 2. Nix sandbox prevents access to home directories anyway
+  # 3. Users should define plugins via `plugins` option or `configFiles`
+  scanUserPlugins = config_path: [];
+
+  # Original IFD implementation preserved for reference
+  _scanUserPluginsIFD = config_path:
     let
-      # Use Nix to call the Lua scanner script
       scanResult = pkgs.runCommand "scan-user-plugins" {
         buildInputs = [ pkgs.lua pkgs.neovim pkgs.luaPackages.luv ];
       } ''
