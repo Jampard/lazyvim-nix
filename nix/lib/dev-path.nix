@@ -32,10 +32,30 @@ rec {
           deduplicated = lib.mapAttrsToList (linkName: plugins: lib.head plugins) grouped;
         in deduplicated;
 
-      # Create symlink commands
-      linkCommands = map (p: "ln -sf ${p.plugin} $out/${p.linkName}") deduplicatedPlugins;
+      # Create link commands that handle doc/ directories specially
+      # Plugins with doc/ get a real directory with symlinked contents
+      # and pre-generated helptags (since the Nix store is read-only)
+      linkCommands = map (p: ''
+        if [ -d "${p.plugin}/doc" ]; then
+          mkdir -p "$out/${p.linkName}"
+          for item in "${p.plugin}"/*; do
+            name=$(basename "$item")
+            if [ "$name" = "doc" ]; then
+              cp -r "$item" "$out/${p.linkName}/doc"
+            else
+              ln -sf "$item" "$out/${p.linkName}/$name"
+            fi
+          done
+          ${pkgs.neovim-unwrapped}/bin/nvim -es --clean \
+            -c "helptags $out/${p.linkName}/doc" -c "quit" 2>/dev/null || true
+        else
+          ln -sf "${p.plugin}" "$out/${p.linkName}"
+        fi
+      '') deduplicatedPlugins;
     in
-      pkgs.runCommand "lazyvim-dev-path" {} ''
+      pkgs.runCommand "lazyvim-dev-path" {
+        nativeBuildInputs = [ pkgs.neovim-unwrapped ];
+      } ''
         mkdir -p $out
         ${lib.concatStringsSep "\n" linkCommands}
       '';
