@@ -101,7 +101,7 @@
     "git_rebase": {
       "url": "https://github.com/the-mikedavis/tree-sitter-git-rebase",
       "revision": "bff4b66b44b020d918d67e2828eada1974a966aa",
-      "sha256": "15xmqwdrkdkglzialmikwq4ky6vhnrhmda66qm40rg94jmsbp04k"
+      "sha256": "1scl94hkfw1g8c0x90i2vqrqyxbmscix2kb9m5603dfz849fa5fl"
     },
     "gitattributes": {
       "url": "https://github.com/tree-sitter-grammars/tree-sitter-gitattributes",
